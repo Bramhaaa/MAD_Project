@@ -370,14 +370,20 @@ public class CustomPlayerView extends PlayerView implements GestureDetector.OnGe
     }
 
     private void restoreSurfaceView() {
-        if (getVideoSurfaceView().getAlpha() != 1) {
-            getVideoSurfaceView().setAlpha(1);
+        View videoSurfaceView = getVideoSurfaceView();
+        if (videoSurfaceView != null && videoSurfaceView.getAlpha() != 1) {
+            videoSurfaceView.setAlpha(1);
         }
     }
 
     public float getScaleFit() {
-        return Math.min((float)getHeight() / (float)getVideoSurfaceView().getHeight(),
-                (float)getWidth() / (float)getVideoSurfaceView().getWidth());
+        View videoSurfaceView = getVideoSurfaceView();
+        // Handle audio-only files where videoSurfaceView size might be 0
+        if (videoSurfaceView == null || videoSurfaceView.getHeight() == 0 || videoSurfaceView.getWidth() == 0) {
+            return 1.0f; // Default scale for audio-only files
+        }
+        return Math.min((float)getHeight() / (float)videoSurfaceView.getHeight(),
+                (float)getWidth() / (float)videoSurfaceView.getWidth());
     }
 
     private enum Orientation {

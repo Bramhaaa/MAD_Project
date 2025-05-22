@@ -1227,6 +1227,14 @@ public class PlayerActivity extends Activity {
                 .setTrackSelector(trackSelector)
                 .setMediaSourceFactory(new DefaultMediaSourceFactory(this, extractorsFactory));
 
+        // Check if we're dealing with an audio-only file
+        boolean isAudioOnly = false;
+        if (haveMedia) {
+            String path = mPrefs.mediaUri.toString().toLowerCase();
+            isAudioOnly = path.endsWith(".mp3") || 
+                         (mPrefs.mediaType != null && mPrefs.mediaType.startsWith("audio/"));
+        }
+
         if (haveMedia && isNetworkUri) {
             if (mPrefs.mediaUri.getScheme().toLowerCase().startsWith("http")) {
                 HashMap<String, String> headers = new HashMap<>();
@@ -1503,6 +1511,33 @@ public class PlayerActivity extends Activity {
                         }
 
                         updateSubtitleViewMargin(format);
+                    } else {
+                        // This is an audio-only file (like MP3)
+                        // Set default orientation and update subtitle margin accordingly
+                        updateSubtitleViewMargin(null);
+                        
+                        // Show audio icon or text if needed
+                        if (mPrefs.mediaUri.toString().toLowerCase().endsWith(".mp3") || 
+                            (mPrefs.mediaType != null && mPrefs.mediaType.startsWith("audio/"))) {
+                            // Configure player for audio-only content
+                            playerView.setControllerShowTimeoutMs(-1); // Keep controls visible for audio
+                            
+                            // Set a title with audio file information
+                            String audioTitle = Utils.getFileName(PlayerActivity.this, mPrefs.mediaUri);
+                            titleView.setText(audioTitle);
+                            titleView.setVisibility(View.VISIBLE);
+                            
+                            // Make sure player view has proper sizing even without video
+                            playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+                            
+                            // Make sure we don't hide controls after playback starts
+                            player.addListener(new Player.Listener() {
+                                @Override
+                                public void onIsPlayingChanged(boolean isPlaying) {
+                                    playerView.setControllerShowTimeoutMs(-1);
+                                }
+                            });
+                        }
                     }
 
                     if (duration != C.TIME_UNSET && duration > TimeUnit.MINUTES.toMillis(20)) {
@@ -1820,7 +1855,18 @@ public class PlayerActivity extends Activity {
 
     // Set margins to fix PGS aspect as subtitle view is outside of content frame
     void updateSubtitleViewMargin(Format format) {
+        final SubtitleView subtitleView = playerView.getSubtitleView();
+        if (subtitleView == null) {
+            return;
+        }
+        
         if (format == null) {
+            // This happens with audio-only files like MP3s
+            // We'll set a default margin for audio-only playback
+            int audioOnlyMargin = 0;
+            final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) subtitleView.getLayoutParams();
+            layoutParams.setMargins(audioOnlyMargin, 0, audioOnlyMargin, 0);
+            subtitleView.requestLayout();
             return;
         }
 

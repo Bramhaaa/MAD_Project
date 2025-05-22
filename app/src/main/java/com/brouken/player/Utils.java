@@ -73,7 +73,7 @@ class Utils {
 
     public static final String FEATURE_FIRE_TV = "amazon.hardware.fire_tv";
 
-    public static final String[] supportedExtensionsVideo = new String[] { "3gp", "m4v", "mkv", "mov", "mp4", "ts", "webm" };
+    public static final String[] supportedExtensionsVideo = new String[] { "3gp", "m4v", "mkv", "mov", "mp4", "ts", "webm", "mp3" };
     public static final String[] supportedExtensionsSubtitle = new String[] { "srt", "ssa", "ass", "vtt", "ttml", "dfxp", "xml" };
 
     public static final String[] supportedMimeTypesVideo = new String[] {
@@ -86,6 +86,9 @@ class Utils {
             MimeTypes.VIDEO_H263, // .3gp
             // For remote storages:
             "video/x-m4v", // .m4v
+            // Audio formats:
+            "audio/mpeg", // .mp3
+            MimeTypes.AUDIO_MPEG, // .mp3 (using ExoPlayer's constant)
     };
     public static final String[] supportedMimeTypesSubtitle = new String[] {
             MimeTypes.APPLICATION_SUBRIP,
